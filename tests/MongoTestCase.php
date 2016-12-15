@@ -45,7 +45,7 @@ abstract class MongoTestCase extends Illuminate\Foundation\Testing\TestCase
 
     protected function resetDatabase()
     {
-        DB::getMongoClient()->dropDatabase('crm_mongodb_test');
+        DB::getMongoClient()->dropDatabase('analogue_mongodb_test');
     }
 
     /**

@@ -24,4 +24,22 @@ class MongoQueryBuilder extends Builder {
         return $value;
     }
 
+    /**
+     * Execute the query as a "select" statement.
+     *
+     * @param  array  $columns
+     * @return array|static[]|Collection
+     */
+    public function get($columns = [])
+    {
+        $results = parent::get($columns);
+
+        return $results->map(function($item) {
+            return array_map(function($attribute) {
+                if ($attribute instanceof ObjectID) {
+                    return (string) $attribute;
+                }
+            }, $item);
+        });
+    }
 }

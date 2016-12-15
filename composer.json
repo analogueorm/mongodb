@@ -35,7 +35,7 @@
             "tests/MongoTestCase.php"
         ],
         "psr-4": {
-            "Test\\": "tests/domain"
+            "Tests\\": "tests/domain"
         }
     },
     "minimum-stability": "dev",
