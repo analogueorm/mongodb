@@ -13,21 +13,9 @@ class AnalogueMongoServiceProvider extends ServiceProvider {
      */
     protected $defer = false;
 
+
     public function boot()
     {
-        //
-
-    }
-
-    /**
-     * Register the service provider.
-     *
-     * @return void
-     */
-    public function register()
-    {
-        $this->app->register(\Jenssegers\Mongodb\MongodbServiceProvider::class);
-
         $db = $this->app['db'];
 
         $driverManager = $this->app['analogue']->getDriverManager();
@@ -40,15 +28,15 @@ class AnalogueMongoServiceProvider extends ServiceProvider {
         $driverManager->addDriver($mongo);
         
     }
-    
-    /**
-     * Get the services provided by the provider.
-     *
-     * @return array
-     */
-    public function provides()
-    {
-        //
-    }
 
+    /**
+     * Register the service provider.
+     *
+     * @return void
+     */
+    public function register()
+    {
+        $this->app->register(\Jenssegers\Mongodb\MongodbServiceProvider::class);
+    }
+    
 }
