@@ -1,11 +1,12 @@
 <?php
 
-use Illuminate\Foundation\Testing\Concerns\InteractsWithDatabase;
 use Illuminate\Contracts\Http\Kernel;
 use Analogue\Factory\Factory;
 use Faker\Factory as Faker;
+use Laravel\BrowserKitTesting\TestCase;
+use Laravel\BrowserKitTesting\Concerns\InteractsWithDatabase;
 
-abstract class MongoTestCase extends Illuminate\Foundation\Testing\TestCase
+abstract class MongoTestCase extends TestCase
 {
     use InteractsWithDatabase;
 
