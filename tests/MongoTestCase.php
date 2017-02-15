@@ -178,8 +178,8 @@ abstract class MongoTestCase extends TestCase
     }
 
     /**
-     * Dump events, for debugging purpose
-     * 
+     * Dump events, for debugging purpose.
+     *
      * @return void
      */
     protected function logEvents()
@@ -194,13 +194,27 @@ abstract class MongoTestCase extends TestCase
         'deleted',
         ];
 
-        foreach($events as $event) {
-            $this->analogue->registerGlobalEvent($event, function($entity) use ($event) {
-                dump(get_class($entity). " ". $event);
+        foreach ($events as $event) {
+            $this->analogue->registerGlobalEvent($event, function ($entity) use ($event) {
+                dump(get_class($entity).' '.$event);
             });
         }
-        
     }
+
+    /**
+     * Log all queries.
+     *
+     * @return void
+     */
+    protected function logQueries()
+    {
+        $db = $this->app->make('db');
+        $db->connection('mongodb')->enableQueryLog();
+        $db->listen(function ($query) {
+            dump($query->sql);
+        });
+    }
+
 
     public function tearDown()
     {

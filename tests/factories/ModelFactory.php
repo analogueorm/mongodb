@@ -18,3 +18,11 @@ $factory->define(Tests\Post::class, function (Faker\Generator $faker) {
     ];
 });
 
+
+$factory->define(Tests\Comment::class, function (Faker\Generator $faker) {
+
+    return [
+        'text' => $faker->sentence,
+    ];
+});
+

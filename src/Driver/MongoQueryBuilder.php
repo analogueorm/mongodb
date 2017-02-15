@@ -15,7 +15,7 @@ class MongoQueryBuilder extends Builder {
     public function insertGetId(array $values, $sequence = null)
     {
         $value = parent::insertGetId($values, $sequence);
-        
+
         // Convert ObjectID to string.
         if ($value instanceof ObjectID) {
             return (string) $value;
@@ -33,11 +33,14 @@ class MongoQueryBuilder extends Builder {
     public function get($columns = [])
     {
         $results = parent::get($columns);
-
+        
         return $results->map(function($item) {
             return array_map(function($attribute) {
                 if ($attribute instanceof ObjectID) {
                     return (string) $attribute;
+                }
+                else {
+                    return $attribute;
                 }
             }, $item);
         });

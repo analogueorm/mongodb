@@ -1,17 +1,22 @@
 <?php
 
 use Tests\Post;
+use Tests\Simple;
 
 class MapperTest extends MongoTestCase
 {
 	/** @test */
-	public function we_can_store_an_entity()
+	public function we_can_store_and_load_an_entity()
 	{
 		$post = analogue_factory(Post::class)->make();
+		$post->title = "Some title";
 		$this->mapper($post)->store($post);
 		$this->seeInDatabase('posts', [
-			'title' => $post->title,
+			'title' => "Some title",
 		]);
+
+		$loadedPost = $this->mapper($post)->find($post->_id);
+		$this->assertEquals("Some title", $loadedPost->title);
 	}
 
 	/** @test */
@@ -55,5 +60,14 @@ class MapperTest extends MongoTestCase
 		$loadedPost = $this->mapper(Post::class)->find($post->_id);
 		$this->assertEquals($loadedPost->_id, $post->_id);
 	}
+
+	/** @test */
+	public function id_column_is_hydrated_when_storing_plain_objects()
+	{
+		$simple = new Simple('simple');
+		$mapper = $this->mapper($simple);
+		$mapper->store($simple);
+		$this->assertNotNull($simple->getId());
+	}	
 
 }

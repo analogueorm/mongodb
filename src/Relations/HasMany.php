@@ -12,12 +12,12 @@ class HasMany extends AnalogueHasMany
      * @param  \Illuminate\Database\Eloquent\Builder  $parent
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function getRelationCountQuery(Builder $query, Builder $parent)
-    {
-        $foreignKey = $this->getHasCompareKey();
+    // public function getRelationCountQuery(Builder $query, Builder $parent)
+    // {
+    //     $foreignKey = $this->getHasCompareKey();
 
-        return $query->select($this->getHasCompareKey())->where($this->getHasCompareKey(), 'exists', true);
-    }
+    //     return $query->select($this->getHasCompareKey())->where($this->getHasCompareKey(), 'exists', true);
+    // }
 
     /**
      * Add the constraints for a relationship query.
@@ -27,22 +27,22 @@ class HasMany extends AnalogueHasMany
      * @param  array|mixed $columns
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function getRelationQuery(Builder $query, Builder $parent, $columns = ['*'])
-    {
-        $query->select($columns);
+    // /public function getRelationQuery(Builder $query, Builder $parent, $columns = ['*'])
+    // {
+    //     $query->select($columns);
 
-        $key = $this->wrap($this->getQualifiedParentKeyName());
+    //     $key = $this->wrap($this->getQualifiedParentKeyName());
 
-        return $query->where($this->getHasCompareKey(), 'exists', true);
-    }
+    //     return $query->where($this->getHasCompareKey(), 'exists', true);
+    // }
 
     /**
      * Get the plain foreign key.
      *
      * @return string
      */
-    public function getPlainForeignKey()
-    {
-        return $this->getForeignKey();
-    }
+    // public function getPlainForeignKey()
+    // {
+    //     return $this->getForeignKey();
+    // }
 }
