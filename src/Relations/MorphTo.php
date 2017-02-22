@@ -1,4 +1,6 @@
-<?php namespace Analogue\MongoDB\Relations;
+<?php 
+
+namespace Analogue\MongoDB\Relations;
 
 use Analogue\ORM\Relationships\MorphTo as AnalogueMorphTo;
 

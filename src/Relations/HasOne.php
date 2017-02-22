@@ -1,4 +1,6 @@
-<?php namespace Analogue\MongoDB\Relations;
+<?php 
+
+namespace Analogue\MongoDB\Relations;
 
 //use Illuminate\Database\Eloquent\Builder;
 use Analogue\ORM\Relationships\HasOne as AnalogueHasOne;

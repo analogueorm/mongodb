@@ -1,27 +1,27 @@
-<?php namespace Analogue\MongoDB\Relations;
+<?php 
 
-//use Illuminate\Database\Eloquent\Collection;
-//use Illuminate\Database\Eloquent\Model;
-//use Illuminate\Database\Eloquent\Relations\BelongsToMany as EloquentBelongsToMany;
+namespace Analogue\MongoDB\Relations;
+
 use Analogue\ORM\Relationships\BelongsToMany as AnalogueBelongsToMany;
+use Analogue\ORM\EntityCollection;
+use Illuminate\Support\Collection;
+use Analogue\ORM\Exceptions\MappingException;
 
 class BelongsToMany extends AnalogueBelongsToMany
 {
     /**
-     * Hydrate the pivot table relationship on the models.
-     *
-     * @param  array  $models
+     * @inheritdoc
      */
-    protected function hydratePivotRelation(array $models)
+    protected function hydratePivotRelation(array $entities)
     {
-        // Do nothing.
+        return $entities;
     }
 
     /**
      * Set the select clause for the relation query.
      *
      * @param  array  $columns
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * @return \Analogue\MongoDB\Relations\BelongsToMany
      */
     protected function getSelectColumns(array $columns = ['*'])
     {
@@ -45,50 +45,31 @@ class BelongsToMany extends AnalogueBelongsToMany
      */
     protected function setWhere()
     {
-        $foreign = $this->getForeignKey();
+        /*$foreign = $this->getForeignKey();
 
-        $this->query->where($foreign, '=', $this->parent->getKey());
+        $parentKey = $this->parentMap->getKeyName();
+
+        $this->query->where($foreign, '=', $this->parent->getEntityAttribute($parentKey));*/
+
+        //$foreign = $this->getForeignKey();
+
+        $relatedKey = $this->relatedMap->getKeyName();
+
+        $this->query->whereIn($relatedKey, $this->getLocalKeyValues());
 
         return $this;
     }
 
     /**
-     * Save a new model and attach it to the parent model.
-     *
-     * @param  \Illuminate\Database\Eloquent\Model  $model
-     * @param  array  $joining
-     * @param  bool   $touch
-     * @return \Illuminate\Database\Eloquent\Model
+     * Return local keys
+     * 
+     * @return array
      */
-    public function save(Model $model, array $joining = [], $touch = true)
+    protected function getLocalKeyValues() : array
     {
-        $model->save(['touch' => false]);
+        $keys = $this->parent->getEntityAttribute($this->otherKey);
 
-        $this->attach($model, $joining, $touch);
-
-        return $model;
-    }
-
-    /**
-     * Create a new instance of the related model.
-     *
-     * @param  array  $attributes
-     * @param  array  $joining
-     * @param  bool   $touch
-     * @return \Illuminate\Database\Eloquent\Model
-     */
-    public function create(array $attributes, array $joining = [], $touch = true)
-    {
-        $instance = $this->related->newInstance($attributes);
-
-        // Once we save the related model, we need to attach it to the base model via
-        // through intermediate table so we'll use the existing "attach" method to
-        // accomplish this which will insert the record and any more attributes.
-        $instance->save(['touch' => false]);
-
-        $this->attach($instance, $joining, $touch);
-
-        return $instance;
+        return is_null($keys) ? [] : $keys;
     }
 
     /**
@@ -98,9 +79,9 @@ class BelongsToMany extends AnalogueBelongsToMany
      * @param  bool   $detaching
      * @return array
      */
-    public function sync($ids, $detaching = true)
+    public function sync(array $ids)
     {
-        $changes = [
+        /*changes = [
             'attached' => [], 'detached' => [], 'updated' => [],
         ];
 
@@ -148,7 +129,7 @@ class BelongsToMany extends AnalogueBelongsToMany
             $this->touchIfTouching();
         }
 
-        return $changes;
+        return $changes;*/
     }
 
     /**
@@ -156,9 +137,8 @@ class BelongsToMany extends AnalogueBelongsToMany
      *
      * @param  mixed  $id
      * @param  array  $attributes
-     * @param  bool   $touch
      */
-    public function updateExistingPivot($id, array $attributes, $touch = true)
+    public function updateExistingPivot($id, array $attributes)
     {
         // Do nothing, we have no pivot table.
     }
@@ -168,11 +148,10 @@ class BelongsToMany extends AnalogueBelongsToMany
      *
      * @param  mixed  $id
      * @param  array  $attributes
-     * @param  bool   $touch
      */
-    public function attach($id, array $attributes = [], $touch = true)
+    public function attach($id, array $attributes = [])
     {
-        if ($id instanceof Model) {
+        /*if ($id instanceof Model) {
             $model = $id;
 
             $id = $model->getKey();
@@ -193,19 +172,18 @@ class BelongsToMany extends AnalogueBelongsToMany
 
         if ($touch) {
             $this->touchIfTouching();
-        }
+        }*/
     }
 
     /**
      * Detach models from the relationship.
      *
      * @param  int|array  $ids
-     * @param  bool  $touch
      * @return int
      */
-    public function detach($ids = [], $touch = true)
+    public function detach($ids = [])
     {
-        if ($ids instanceof Model) {
+        /*if ($ids instanceof Model) {
             $ids = (array) $ids->getKey();
         }
 
@@ -231,7 +209,7 @@ class BelongsToMany extends AnalogueBelongsToMany
             $this->touchIfTouching();
         }
 
-        return count($ids);
+        return count($ids);*/
     }
 
     /**
@@ -240,9 +218,10 @@ class BelongsToMany extends AnalogueBelongsToMany
      * @param  \Illuminate\Database\Eloquent\Collection  $results
      * @return array
      */
-    protected function buildDictionary(Collection $results)
+    protected function buildDictionary(EntityCollection $results)
     {
-        $foreign = $this->foreignKey;
+        //dd($results);
+        /*$foreign = $this->foreignKey;
 
         // First we will build a dictionary of child models keyed by the foreign key
         // of the relation so that we will easily and quickly match them to their
@@ -255,7 +234,7 @@ class BelongsToMany extends AnalogueBelongsToMany
             }
         }
 
-        return $dictionary;
+        return $dictionary;*/
     }
 
     /**
@@ -286,5 +265,35 @@ class BelongsToMany extends AnalogueBelongsToMany
     public function getForeignKey()
     {
         return $this->foreignKey;
+    }
+
+    /**
+     * Return the column that will be used to locally store
+     * the related id(s)
+     * 
+     * @return array
+     */
+    public function getForeignKeyValuePair() : array
+    {
+        $key = $this->otherKey;
+        
+        $relatedEntities = $this->parent->getEntityAttribute($this->relation);
+
+        if($relatedEntities instanceof Collection) {
+            $relatedEntities = $relatedEntities->all(); 
+        }
+
+        if(! is_array($relatedEntities)) {
+            throw new MappingException("$this->relation should be an array or collection.");
+        }
+
+        $relatedKey = $this->relatedMapper->getEntityMap()->getKeyName();
+        $host = $this;
+        $keys = array_map(function($entity) use ($relatedKey, $host) {
+            $wrapper = $host->factory->make($entity);
+            return $wrapper->getEntityAttribute($relatedKey);
+        }, $relatedEntities);
+
+        return [$key => $keys];
     }
 }
