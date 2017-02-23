@@ -208,11 +208,21 @@ abstract class MongoTestCase extends TestCase
      */
     protected function logQueries()
     {
-        $db = $this->app->make('db');
+        $db = $this->db();
         $db->connection('mongodb')->enableQueryLog();
         $db->listen(function ($query) {
             dump($query->sql);
         });
+    }
+
+    /**
+     * Shortcut to db
+     * 
+     * @return Illuminate\Database\Manager
+     */
+    protected function db()
+    {
+        return $this->app->make('db');
     }
 
 

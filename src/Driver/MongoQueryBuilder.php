@@ -17,6 +17,8 @@ class MongoQueryBuilder extends Builder {
      */
     public function insertGetId(array $values, $sequence = null)
     {
+        $this->prepareValuesForSave($values);
+
         $value = parent::insertGetId($values, $sequence);
 
         // Convert ObjectID to string.
@@ -33,10 +35,11 @@ class MongoQueryBuilder extends Builder {
      * @param  array  $values
      * @return int
      */
-    /*public function insert(array $values)
+    public function insert(array $values)
     {
-
-    }*/
+        $this->prepareValuesForSave($values);
+        return parent::insert($values);
+    }
 
     /**
      * Perform an Update operation
@@ -44,10 +47,11 @@ class MongoQueryBuilder extends Builder {
      * @param  array  $options
      * @return int
      */
-    /*public function update(array $values, array $options = [])
+    public function update(array $values, array $options = [])
     {
-
-    }*/
+        $this->prepareValuesForSave($values);
+        return parent::update($values, $options);
+    }
 
     /**
      * Execute the query as a "select" statement.
@@ -59,18 +63,7 @@ class MongoQueryBuilder extends Builder {
     {
         $results = parent::get($columns);
         
-        // Map results to prepareValuesForHydration()
-
-        return $results->map(function($item) {
-            return array_map(function($attribute) {
-                if ($attribute instanceof ObjectID) {
-                    return (string) $attribute;
-                }
-                else {
-                    return $attribute;
-                }
-            }, $item);
-        });
+        return $results->map([$this, 'prepareValuesForHydration']);
     }
 
     /**
@@ -79,8 +72,16 @@ class MongoQueryBuilder extends Builder {
      * @param  array  $values
      * @return array
      */
-    protected function prepareValuesForSave(array $values)
+    public function prepareValuesForSave(array &$values)
     {
+        $host = $this;
+
+        array_walk_recursive($values, function(&$item) use ($host) {
+            if($item instanceof DateTime) {
+                $item = $host->fromDateTime($item);
+            }
+        });
+
         return $values;
     }
 
@@ -90,8 +91,19 @@ class MongoQueryBuilder extends Builder {
      * @param  array  $values
      * @return array $values
      */
-    protected function prepareValuesForHydration(array $values)
+    public function prepareValuesForHydration(array $values)
     {
+        $host = $this;
+
+        array_walk_recursive($values, function(&$item) use ($host) {
+            if($item instanceof UTCDateTime) {
+                $item = $host->asDateTime($item);
+            }
+            if ($item instanceof ObjectID) {
+                $item = (string) $item;
+            }
+        });
+
         return $values;
     }
 
