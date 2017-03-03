@@ -2,6 +2,7 @@
 
 use Carbon\Carbon;
 use DateTime;
+use DateTimeInterface;
 use Jenssegers\Mongodb\Query\Builder;
 use MongoDB\BSON\ObjectID;
 use MongoDB\BSON\UTCDateTime;
@@ -50,20 +51,8 @@ class MongoQueryBuilder extends Builder {
     public function update(array $values, array $options = [])
     {
         $this->prepareValuesForSave($values);
-        return parent::update($values, $options);
-    }
 
-    /**
-     * Execute the query as a "select" statement.
-     *
-     * @param  array  $columns
-     * @return array|static[]|Collection
-     */
-    public function get($columns = [])
-    {
-        $results = parent::get($columns);
-        
-        return $results->map([$this, 'prepareValuesForHydration']);
+        return parent::update($values, $options);
     }
 
     /**
@@ -86,28 +75,6 @@ class MongoQueryBuilder extends Builder {
     }
 
     /**
-     * Convert values to Analogue friendly values
-     * 
-     * @param  array  $values
-     * @return array $values
-     */
-    public function prepareValuesForHydration(array $values)
-    {
-        $host = $this;
-
-        array_walk_recursive($values, function(&$item) use ($host) {
-            if($item instanceof UTCDateTime) {
-                $item = $host->asDateTime($item);
-            }
-            if ($item instanceof ObjectID) {
-                $item = (string) $item;
-            }
-        });
-
-        return $values;
-    }
-
-    /**
      * Convert a DateTime to a storable UTCDateTime object.
      *
      * @param  DateTime|int  $value
@@ -120,9 +87,8 @@ class MongoQueryBuilder extends Builder {
             return $value;
         }
 
-        // Let Eloquent convert the value to a DateTime instance.
         if (! $value instanceof DateTime) {
-            $value = parent::asDateTime($value);
+            $value = $this->timeStampToDateTime($value);
         }
 
         return new UTCDateTime($value->getTimestamp() * 1000);
@@ -132,15 +98,45 @@ class MongoQueryBuilder extends Builder {
      * Return a timestamp as DateTime object.
      *
      * @param  mixed  $value
-     * @return DateTime
+     * @return \Carbon\Carbon
      */
-    protected function asDateTime($value)
+    protected function timeStampToDateTime($value)
     {
-        // Convert UTCDateTime instances.
-        if ($value instanceof UTCDateTime) {
-            return Carbon::createFromTimestamp($value->toDateTime()->getTimestamp());
+        // If this value is already a Carbon instance, we shall just return it as is.
+        // This prevents us having to re-instantiate a Carbon instance when we know
+        // it already is one, which wouldn't be fulfilled by the DateTime check.
+        if ($value instanceof Carbon) {
+            return $value;
         }
 
-        return parent::asDateTime($value);
+         // If the value is already a DateTime instance, we will just skip the rest of
+         // these checks since they will be a waste of time, and hinder performance
+         // when checking the field. We will just return the DateTime right away.
+        if ($value instanceof DateTimeInterface) {
+            return new Carbon(
+                $value->format('Y-m-d H:i:s.u'), $value->getTimezone()
+            );
+        }
+
+        // If this value is an integer, we will assume it is a UNIX timestamp's value
+        // and format a Carbon object from this timestamp. This allows flexibility
+        // when defining your date fields as they might be UNIX timestamps here.
+        if (is_numeric($value)) {
+            return Carbon::createFromTimestamp($value);
+        }
+
+        // If the value is in simply year, month, day format, we will instantiate the
+        // Carbon instances from that format. Again, this provides for simple date
+        // fields on the database, while still supporting Carbonized conversion.
+        if ($this->isStandardDateFormat($value)) {
+            return Carbon::createFromFormat('Y-m-d', $value)->startOfDay();
+        }
+
+        // Finally, we will just assume this date is in the format used by default on
+        // the database connection and use that format to create the Carbon object
+        // that is returned back out to the developers after we convert it here.
+        return Carbon::createFromFormat(
+            $this->getDateFormat(), $value
+        );
     }
 }

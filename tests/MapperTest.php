@@ -35,6 +35,36 @@ class MapperTest extends MongoTestCase
 	}
 
 	/** @test */
+	public function we_can_update_an_entity_with_new_field()
+	{
+		$post = analogue_factory(Post::class)->make();
+		$this->mapper($post)->store($post);
+
+		$post->description = 'awesome title';
+
+		$this->mapper($post)->store($post);
+
+		$this->seeInDatabase('posts', [
+			'description' => 'awesome title',
+		]);
+	}
+
+	/** @test */
+	public function we_can_update_an_entity_with_new_array_field()
+	{
+		$post = analogue_factory(Post::class)->make();
+		$this->mapper($post)->store($post);
+
+		$post->description = ['some array'];
+
+		$this->mapper($post)->store($post);
+
+		$this->seeInDatabase('posts', [
+			'description' => ['some array'],
+		]);
+	}
+
+	/** @test */
 	public function we_can_update_an_entity_from_a_query()
 	{
 		$post = analogue_factory(Post::class)->make();

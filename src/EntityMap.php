@@ -116,6 +116,7 @@ class EntityMap extends SqlEntityMap {
         $relatedMap = $relatedMapper->getEntityMap();
 
         $otherKey = $otherKey ?: $relatedMap->getForeignKey().'s';
+        $this->localForeignKeys[$relation] = $otherKey;
 
         // If no table name was provided, we can guess it by concatenating the two
         // models using underscores in alphabetical order. The two model names
