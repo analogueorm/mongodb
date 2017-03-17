@@ -133,5 +133,34 @@ class BelongsToManyTest extends MongoTestCase
 			'_id' => $user->_id,
 			'role_ids' => [],
 		]);
+
+
+	}
+
+	/** @test */
+	public function non_loaded_collection_proxy_foreign_keys_are_not_overwritten_on_store()
+	{
+		$this->logQueries();
+		$user = new User;
+		$user->email = 'test@example.com';
+		$roleA = new Role;
+		$roleA->name = "Role A";
+		$roleB = new Role;
+		$roleB->name = "Role B";
+		$user->roles->push($roleA);
+		$user->roles->push($roleB);
+		$mapper = $this->mapper($user);
+		$mapper->store($user);
+		$loadedUser = $mapper->find($user->_id);
+		setTddOn();
+		$mapper->store($loadedUser);
+
+		$this->seeInDatabase('users', [
+			'_id' => $user->_id,
+			'role_ids' => [
+				$roleA->_id,
+				$roleB->_id,
+			],
+		]);
 	}
 }

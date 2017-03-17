@@ -37,7 +37,10 @@
         ],
         "psr-4": {
             "Tests\\": "tests/domain"
-        }
+        },
+        "files": [
+            "tests/helpers.php"
+        ]
     },
     "minimum-stability": "dev",
     "prefer-stable":true
