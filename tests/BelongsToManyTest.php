@@ -48,7 +48,7 @@ class BelongsToManyTest extends MongoTestCase
 		//$this->logQueries();
 		$user = new User;
 		$user->email = 'test@example.com';
-		$roleA = new Role;
+		$roleA = new Role;	
 		$roleA->name = "Role A";
 		$roleB = new Role;
 		$roleB->name = "Role B";
@@ -56,8 +56,9 @@ class BelongsToManyTest extends MongoTestCase
 		$user->roles->push($roleB);
 		$mapper = $this->mapper($user);
 		$mapper->store($user);
-		
+		setTddOn();
 		$loadedUser = $mapper->with('roles')->where("_id", "=", $user->_id)->first();
+		//dd($loadedUser);
 		$this->assertNotInstanceOf(ProxyInterface::class, $loadedUser->roles);
 		$this->assertNotInstanceOf(CollectionProxy::class, $loadedUser->roles);
 		$this->assertInstanceOf(EntityCollection::class, $loadedUser->roles);
@@ -140,7 +141,7 @@ class BelongsToManyTest extends MongoTestCase
 	/** @test */
 	public function non_loaded_collection_proxy_foreign_keys_are_not_overwritten_on_store()
 	{
-		$this->logQueries();
+		//$this->logQueries();
 		$user = new User;
 		$user->email = 'test@example.com';
 		$roleA = new Role;

@@ -39,6 +39,92 @@ class BelongsToMany extends AnalogueBelongsToMany
     }
 
     /**
+     * Set the constraints for an eager load of the relation.
+     *
+     * @param array $results
+     *
+     * @return void
+     */
+    public function addEagerConstraints(array $results)
+    {
+        $key = $this->relatedMap->getKeyName();
+        $this->query->whereIn($key, $this->getForeignKeysFromResults($results));
+    }
+
+    /**
+     * Get foreign keys from results
+     *
+     * @param  array  $results
+     * @return array
+     */
+    protected function getForeignKeysFromResults(array $results)
+    {
+        return array_reduce($results, function($carry, $item) {
+            return array_merge($carry, $item[$this->otherKey]);    
+        }, []);
+    }
+
+     /**
+     * Match Eagerly loaded relation to result.
+     *
+     * @param array  $results
+     * @param string $relation
+     *
+     * @return array
+     */
+    public function match(array $results, $relation)
+    {
+        $entities = $this->getEager();
+
+        // TODO; optimize this operation
+        $dictionary = $this->buildDictionary($entities);
+
+        $foreignKeyName = $this->otherKey;
+
+        $cache = $this->parentMapper->getEntityCache();
+
+        return array_map(function($result) use($dictionary, $foreignKeyName, $cache, $relation) {
+            $primaryKey = $result[$this->parentMap->getKeyName()];
+            $keys = $result[$foreignKeyName];
+            $relatedEntities = array_only($dictionary, $keys);
+
+            if(count($relatedEntities) > 0) {
+                $collection = $this->relatedMap->newCollection($relatedEntities);
+                $result[$relation] = $collection;
+                $cache->cacheLoadedRelationResult($primaryKey, $relation, $collection, $this);
+            }
+            else {
+                $result[$relation] = $this->relatedMap->newCollection();
+            }
+
+            return $result;
+
+        },$results);
+    }
+
+    /**
+     * Build model dictionary keyed by the relation's foreign key.
+     *
+     * @param EntityCollection $results
+     *
+     * @return array
+     */
+    protected function buildDictionary(EntityCollection $results)
+    {
+        $foreign = $this->foreignKey;
+
+        $dictionary = [];
+        
+        foreach ($results as $entity) {
+            $wrapper = $this->factory->make($entity);
+
+            $dictionary[$wrapper->getEntityKey()] = $entity;
+        }
+
+        return $dictionary;
+    }
+
+    /**
      * Set the where clause for the relation query.
      *
      * @return $this
@@ -218,7 +304,7 @@ class BelongsToMany extends AnalogueBelongsToMany
      * @param  \Illuminate\Database\Eloquent\Collection  $results
      * @return array
      */
-    protected function buildDictionary(EntityCollection $results)
+    /*protected function buildDictionary(EntityCollection $results)
     {
         //dd($results);
         /*$foreign = $this->foreignKey;
@@ -234,8 +320,8 @@ class BelongsToMany extends AnalogueBelongsToMany
             }
         }
 
-        return $dictionary;*/
-    }
+        return $dictionary;
+    }*/
 
     /**
      * Create a new query builder for the related model.
