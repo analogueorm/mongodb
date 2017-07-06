@@ -89,7 +89,7 @@ class BelongsToMany extends AnalogueBelongsToMany
             $relatedEntities = array_only($dictionary, $keys);
 
             if(count($relatedEntities) > 0) {
-                $collection = $this->relatedMap->newCollection($relatedEntities);
+                $collection = $this->relatedMap->newCollection(array_values($relatedEntities));
                 $result[$relation] = $collection;
                 $cache->cacheLoadedRelationResult($primaryKey, $relation, $collection, $this);
             }
@@ -140,8 +140,8 @@ class BelongsToMany extends AnalogueBelongsToMany
         //$foreign = $this->getForeignKey();
 
         $relatedKey = $this->relatedMap->getKeyName();
-
-        $this->query->whereIn($relatedKey, $this->getLocalKeyValues());
+        
+        $this->query->whereIn($relatedKey, $this->getLocalKeyValues()); 
 
         return $this;
     }
@@ -167,6 +167,11 @@ class BelongsToMany extends AnalogueBelongsToMany
      */
     public function sync(array $ids)
     {
+        // * NOTE *
+        // Maybe not necessary unless we want to update the related collection for
+        // inverse relationship, because the keys are normalized on the parent
+        // collection.
+
         /*changes = [
             'attached' => [], 'detached' => [], 'updated' => [],
         ];
