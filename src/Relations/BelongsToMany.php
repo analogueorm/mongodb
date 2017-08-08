@@ -88,7 +88,7 @@ class BelongsToMany extends AnalogueBelongsToMany
 
         return array_map(function($result) use($dictionary, $foreignKeyName, $cache, $relation) {
             $primaryKey = $result[$this->parentMap->getKeyName()];
-            $keys = $result[$foreignKeyName];
+            $keys = array_key_exists($foreignKeyName, $result) ? $result[$foreignKeyName] : [];
             $relatedEntities = array_only($dictionary, $keys);
 
             if(count($relatedEntities) > 0) {
