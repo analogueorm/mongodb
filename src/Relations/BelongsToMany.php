@@ -60,7 +60,7 @@ class BelongsToMany extends AnalogueBelongsToMany
     protected function getForeignKeysFromResults(array $results)
     {
         return array_reduce($results, function($carry, $item) {
-            if(! array_key_exists($this->otherKey, $item) {
+            if(! array_key_exists($this->otherKey, $item)) {
                 return array_merge($carry, []);
             }
             return array_merge($carry, $item[$this->otherKey]);    
