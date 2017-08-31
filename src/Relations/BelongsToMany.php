@@ -60,6 +60,9 @@ class BelongsToMany extends AnalogueBelongsToMany
     protected function getForeignKeysFromResults(array $results)
     {
         return array_reduce($results, function($carry, $item) {
+            if(! array_key_exists($this->otherKey, $item)) {
+                return array_merge($carry, []);
+            }
             return array_merge($carry, $item[$this->otherKey]);    
         }, []);
     }
@@ -85,7 +88,7 @@ class BelongsToMany extends AnalogueBelongsToMany
 
         return array_map(function($result) use($dictionary, $foreignKeyName, $cache, $relation) {
             $primaryKey = $result[$this->parentMap->getKeyName()];
-            $keys = $result[$foreignKeyName];
+            $keys = array_key_exists($foreignKeyName, $result) ? $result[$foreignKeyName] : [];
             $relatedEntities = array_only($dictionary, $keys);
 
             if(count($relatedEntities) > 0) {
