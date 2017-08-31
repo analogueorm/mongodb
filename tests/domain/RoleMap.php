@@ -6,9 +6,14 @@ use Analogue\MongoDB\EntityMap;
 
 class RoleMap extends EntityMap {
 
-	public function roles(User $user)
+	public function roles(Role $role)
 	{
-		return $this->belongsToMany($user, Role::class);
+		return $this->belongsToMany($role, User::class);
 	}
 
+
+	public function creator(Role $role)
+	{
+		return $this->belongsTo($role, User::class);
+	}
 }

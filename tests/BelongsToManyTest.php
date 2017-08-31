@@ -164,4 +164,79 @@ class BelongsToManyTest extends MongoTestCase
 			],
 		]);
 	}
+
+	/** @test */
+	public function new_attributes_on_an_existing_relationship_are_added()
+	{
+		$user = new User;
+		$user->email = 'test@example.com';
+		$roleA = new Role;
+		$roleA->name = "Role A";
+		$roleB = new Role;
+		$roleB->name = "Role B";
+		$user->roles->push($roleA);
+		$user->roles->push($roleB);
+		$mapper = $this->mapper($user);
+		$mapper->store($user);
+		$user->roles->map(function($role) {
+			$role->some_attribute = "1234";
+		});
+		$mapper->store($user);
+		$this->seeInDatabase('roles', [
+			'some_attribute' => "1234",
+		]);
+
+	}
+
+	/** @test */
+	public function existing_dirty_attributes_on_an_existing_relationship_are_updated()
+	{
+		$user = new User;
+		$user->email = 'test@example.com';
+		$roleA = new Role;
+		$roleA->name = "Role A";
+		$roleB = new Role;
+		$roleB->name = "Role B";
+		$user->roles->push($roleA);
+		$user->roles->push($roleB);
+		$mapper = $this->mapper($user);
+		$mapper->store($user);
+		$user->roles->map(function($role) {
+			$role->some_attribute = "1234";
+		});
+		$mapper->store($user);
+		$this->seeInDatabase('roles', [
+			'some_attribute' => "1234",
+		]);
+		$user->roles->map(function($role) {
+			$role->some_attribute = "3456";
+		});
+		$mapper->store($user);
+		$this->seeInDatabase('roles', [
+			'some_attribute' => "3456",
+		]);
+	}
+
+	/** @test */
+	public function dirty_relationship_on_an_existing_relationship_is_updated()
+	{
+		$this->logQueries();
+		$user = new User;
+		$user->email = 'test@example.com';
+		$roleA = new Role;
+		$roleA->name = "Role A";
+		$roleB = new Role;
+		$roleB->name = "Role B";
+		$user->roles->push($roleA);
+		$user->roles->push($roleB);
+		$mapper = $this->mapper($user);
+		$mapper->store($user);
+		$user->roles->map(function($role) use ($user) {
+			$role->creator_id = $user->_id;
+		});
+		$mapper->store($user);
+		$this->seeInDatabase('roles', [
+			'creator_id' => $user->_id,
+		]);
+	}
 }
