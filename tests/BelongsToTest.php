@@ -45,6 +45,7 @@ class BelongsToTest extends MongoTestCase
 		$comment->post = $post;
 		$mapper = $this->mapper($comment);
 		$mapper->store($comment);
+		$this->clearCache();
 		$loadedComment = $mapper->where('_id','=',$comment->_id)->first();
 		$this->assertInstanceOf(Post::class, $loadedComment->post);
 		$this->assertInstanceOf(ProxyInterface::class, $loadedComment->post);

@@ -34,6 +34,7 @@ class HasManyTest extends MongoTestCase
 		$post->comments = [$comment];
 		$mapper = $this->mapper($post);
 		$this->mapper($post)->store($post);
+		$this->clearCache();
 		$loadedPost = $this->mapper($post)->with('comments')->where('_id','=',$post->_id)->first();
 		$this->assertInstanceOf(Collection::class, $loadedPost->comments);
 
@@ -47,7 +48,9 @@ class HasManyTest extends MongoTestCase
 		$post->comments = [$comment];
 		$mapper = $this->mapper($post);
 		$this->mapper($post)->store($post);
+		$this->clearCache();
 		$loadedPost = $this->mapper($post)->where('_id','=',$post->_id)->first();
+
 		$this->assertInstanceOf(Collection::class, $loadedPost->comments);
 		$this->assertInstanceOf(ProxyInterface::class, $loadedPost->comments);
 		$this->assertInstanceOf(CollectionProxy::class, $loadedPost->comments);
@@ -62,6 +65,8 @@ class HasManyTest extends MongoTestCase
 		$post->comments = [$comment];
 		$mapper = $this->mapper($post);
 		$this->mapper($post)->store($post);
+
+		$this->clearCache();
 		$loadedPost = $this->mapper($post)->where('_id','=',$post->_id)->first();
 		$loadedPost->comments->first()->text="New Comment";
 		$mapper->store($loadedPost);

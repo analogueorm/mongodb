@@ -214,6 +214,11 @@ abstract class MongoTestCase extends TestCase
             dump($query->sql);
         });
     }
+    
+    protected function clearCache()
+    {
+        app('analogue')->clearCache();
+    }
 
     /**
      * Shortcut to db

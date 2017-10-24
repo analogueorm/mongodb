@@ -14,7 +14,9 @@ class BelongsToManyTest extends MongoTestCase
 	{
 		$user = new User;
 		$user->email = 'test@example.com';
+		$this->mapper(User::class)->store($user);
 		$this->seeInDatabase('users', [
+			'email' => "test@example.com",
 			'role_ids' => []
 		]);
 	}
@@ -45,7 +47,6 @@ class BelongsToManyTest extends MongoTestCase
 	/** @test */
 	public function we_can_eager_load_a_belongs_to_many_related_entity()
 	{
-		//$this->logQueries();
 		$user = new User;
 		$user->email = 'test@example.com';
 		$roleA = new Role;	
@@ -56,9 +57,8 @@ class BelongsToManyTest extends MongoTestCase
 		$user->roles->push($roleB);
 		$mapper = $this->mapper($user);
 		$mapper->store($user);
-		setTddOn();
+		$this->clearCache();
 		$loadedUser = $mapper->with('roles')->where("_id", "=", $user->_id)->first();
-		//dd($loadedUser);
 		$this->assertNotInstanceOf(ProxyInterface::class, $loadedUser->roles);
 		$this->assertNotInstanceOf(CollectionProxy::class, $loadedUser->roles);
 		$this->assertInstanceOf(EntityCollection::class, $loadedUser->roles);
@@ -80,7 +80,7 @@ class BelongsToManyTest extends MongoTestCase
 		$user->roles->push($roleB);
 		$mapper = $this->mapper($user);
 		$mapper->store($user);
-		
+		$this->clearCache();
 		$loadedUser = $mapper->find($user->_id);
 		$this->assertInstanceOf(ProxyInterface::class, $loadedUser->roles);
 		$this->assertInstanceOf(CollectionProxy::class, $loadedUser->roles);
@@ -115,7 +115,6 @@ class BelongsToManyTest extends MongoTestCase
 	/** @test */
 	public function setting_a_relationship_attribute_to_null_set_foreign_keys_to_an_empty_array()
 	{
-		//$this->logQueries();
 		$user = new User;
 		$user->email = 'test@example.com';
 		$roleA = new Role;
@@ -126,12 +125,13 @@ class BelongsToManyTest extends MongoTestCase
 		$user->roles->push($roleB);
 		$mapper = $this->mapper($user);
 		$mapper->store($user);
-		
+		$this->clearCache();
 		$loadedUser = $mapper->find($user->_id);
 		$loadedUser->roles = null;
-
+		$mapper->store($loadedUser);
 		$this->seeInDatabase('users', [
 			'_id' => $user->_id,
+			'email' => 'test@example.com',
 			'role_ids' => [],
 		]);
 
@@ -220,7 +220,6 @@ class BelongsToManyTest extends MongoTestCase
 	/** @test */
 	public function dirty_relationship_on_an_existing_relationship_is_updated()
 	{
-		$this->logQueries();
 		$user = new User;
 		$user->email = 'test@example.com';
 		$roleA = new Role;
