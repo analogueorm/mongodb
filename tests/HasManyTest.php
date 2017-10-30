@@ -85,6 +85,7 @@ class HasManyTest extends MongoTestCase
 		$post->comments = [$comment1, $comment2];
 		$mapper = $this->mapper($post);
 		$this->mapper($post)->store($post);
+		$this->clearCache();
 
 		$loadedPost = $this->mapper($post)->where('_id','=',$post->_id)->first();
 		$loadedPost->comments = null;
@@ -97,5 +98,70 @@ class HasManyTest extends MongoTestCase
 			'text' => $comment2->text,
 			'post_id' => null
 		]);
+	}
+
+	/** @test */
+	public function saving_an_aggregate_with_relationships_does_not_detach_them()
+	{
+		$post = analogue_factory(Post::class)->make();
+		$comment1 = analogue_factory(Comment::class)->make();
+		$comment2 = analogue_factory(Comment::class)->make();
+		$post->comments = [$comment1, $comment2];
+		$mapper = $this->mapper($post);
+		$this->mapper($post)->store($post);
+
+		$this->clearCache();
+		$loadedPost = $this->mapper($post)->where('_id','=',$post->_id)->first();
+		$mapper->store($loadedPost);
+		$this->seeInDatabase('comments', [
+			'text' => $comment1->text,
+			'post_id' => $post->_id,
+		]);
+		$this->seeInDatabase('comments', [
+			'text' => $comment2->text,
+			'post_id' => $post->_id,
+		]);
+
+		$this->clearCache();
+		$loadedPost = $this->mapper($post)->with('comments')->where('_id','=',$post->_id)->first();
+		$mapper->store($loadedPost);
+		$this->seeInDatabase('comments', [
+			'text' => $comment1->text,
+			'post_id' => $post->_id,
+		]);
+		$this->seeInDatabase('comments', [
+			'text' => $comment2->text,
+			'post_id' => $post->_id,
+		]);
+
+		$this->clearCache();
+		$loadedPost = $this->mapper($post)->where('_id','=',$post->_id)->first();
+		$loadedPost->comments->map(function($comment) {
+			$comment->text = "some non sense";
+		});		
+		$mapper->store($loadedPost);
+
+		$this->seeInDatabase('comments', [
+			'text' => "some non sense",
+			'post_id' => $post->_id,
+		]);
+
+		$this->clearCache();
+		$loadedPost = $this->mapper($post)->where('_id','=',$post->_id)->first();
+		$id = $loadedPost->comments->first()->_id;
+		$loadedPost->comments = $loadedPost->comments->filter(function($post) use ($id) {
+			return $post->_id == $id;
+		});
+		$mapper->store($loadedPost);
+
+		$this->seeInDatabase('comments', [
+			'text' => "some non sense",
+			'post_id' => $post->_id,
+		]);
+		$this->seeInDatabase('comments', [
+			'text' => "some non sense",
+			'post_id' => null,
+		]);
+
 	}
 }

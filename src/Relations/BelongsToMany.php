@@ -121,7 +121,7 @@ class BelongsToMany extends AnalogueBelongsToMany
         foreach ($results as $entity) {
             $wrapper = $this->factory->make($entity);
 
-            $dictionary[$wrapper->getEntityKey()] = $entity;
+            $dictionary[$wrapper->getEntityKeyValue()] = $entity;
         }
 
         return $dictionary;
