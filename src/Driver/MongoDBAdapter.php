@@ -38,9 +38,9 @@ class MongoDBAdapter implements DBAdapter {
      * 
      * @return string
      */
-    public function getDateFormat()
+    public function getDateFormat() : string
     {
-        //return $this->connection->getQueryGrammar()->getDateFormat();
+        return "";
     }
 
     /**

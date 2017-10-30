@@ -7,6 +7,7 @@ use Analogue\ORM\EntityMap as SqlEntityMap;
 use Analogue\ORM\Relationships\EmbedsOne;
 use Analogue\ORM\Relationships\EmbedsMany;
 use Analogue\MongoDB\Relations\BelongsToMany;
+use Analogue\ORM\Relationships\BelongsToMany as BaseBelongsToMany;
 
 class EntityMap extends SqlEntityMap {
 
@@ -49,7 +50,7 @@ class EntityMap extends SqlEntityMap {
      *
      * @return EmbedsOne
      */
-    public function embedsOne($parent, string $relatedClass, $relation = null) : EmbedsOne
+    public function embedsOne($parent, string $relatedClass, string $relation = null) : EmbedsOne
     {
         if(is_null($relation)) {
             list(, $caller) = debug_backtrace(false);
@@ -69,7 +70,7 @@ class EntityMap extends SqlEntityMap {
      *
      * @return EmbedsOne
      */
-    public function embedsMany($parent, string $relatedClass, $relation = null) : EmbedsMany
+    public function embedsMany($parent, string $relatedClass,string $relation = null) : EmbedsMany
     {
         if(is_null($relation)) {
             list(, $caller) = debug_backtrace(false);
@@ -94,7 +95,7 @@ class EntityMap extends SqlEntityMap {
      *
      * @return \Analogue\MongoDB\Relations\BelongsToMany
      */
-    public function belongsToMany($entity, $related, $collection = null, $foreignKey = null, $otherKey = null)
+    public function belongsToMany($entity, string $related, string $collection = null, string $foreignKey = null, string $otherKey = null) : BaseBelongsToMany
     {
         // Add the relation to the definition in map
         list(, $caller) = debug_backtrace(false);

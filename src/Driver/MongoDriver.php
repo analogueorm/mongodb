@@ -1,6 +1,7 @@
 <?php namespace Analogue\MongoDB\Driver;
 
 use Analogue\ORM\Drivers\DriverInterface;
+use Analogue\ORM\Drivers\DBAdapter;
 
 class MongoDriver implements DriverInterface {
 
@@ -21,7 +22,7 @@ class MongoDriver implements DriverInterface {
      * 
      * @return string
      */
-    public function getName()
+    public function getName() : string
     {
         return 'mongodb';
     }
@@ -32,7 +33,7 @@ class MongoDriver implements DriverInterface {
      * @param  string $connection 
      * @return \Analogue\ORM\DBAdater
      */
-    public function getAdapter($connection = null)
+    public function getAdapter(string $connection = null) : DBAdapter
     {
         $connection = $this->connectionProvider->connection($connection);
 
