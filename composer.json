@@ -13,17 +13,17 @@
     ],
     "require": {
         "php": ">=7.0.0",
-        "analogue/orm": "~5.5",
-        "jenssegers/mongodb": "3.3.0-alpha"
+        "analogue/orm": "5.5.*|5.6.*",
+        "jenssegers/mongodb": "3.3.*|3.4.*"
     },
     "require-dev": {
         "phpunit/phpunit": "~5.0",
-        "laravel/laravel": "5.5",
+        "laravel/laravel": "5.5.*|5.6.*",
         "fzaninotto/faker": "~1.4",
         "mockery/mockery": "0.9.*",
-        "symfony/css-selector": "2.8.*|3.0.*",
-        "symfony/dom-crawler": "2.8.*|3.0.*",
-        "analogue/factory": "~1.1.0",
+        "symfony/css-selector": "2.8.*|3.0.*|4.0.*",
+        "symfony/dom-crawler": "2.8.*|3.0.*|4.0.*",
+        "analogue/factory": "1.1.*|1.2.*",
         "laravel/browser-kit-testing": "~1.0"
     },
     "autoload": {
