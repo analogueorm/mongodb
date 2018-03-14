@@ -6,6 +6,19 @@ use Tests\Simple;
 class MapperTest extends MongoTestCase
 {
 	/** @test */
+	public function we_can_use_a_custom_id_value()
+	{
+		$post = analogue_factory(Post::class)->make();
+		$post->_id = str_random(32);
+		$post->title = "Some title";
+		$this->mapper($post)->store($post);
+		$this->seeInDatabase('posts', [
+			'_id' => $post->_id,
+			'title' => "Some title",
+		]);
+	}
+
+	/** @test */
 	public function we_can_store_and_load_an_entity()
 	{
 		$post = analogue_factory(Post::class)->make();
